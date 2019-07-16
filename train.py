@@ -21,14 +21,10 @@ parser = argparse.ArgumentParser(description='Face Recognition using Triplet Los
 
 parser.add_argument('--num-epochs', default=200, type=int, metavar='NE',
                     help='number of epochs to train (default: 200)')
-parser.add_argument('--num-classes', default=10000, type=int, metavar='NC',
-                    help='number of clases (default: 10000)')
 parser.add_argument('--num-train-triplets', default=10000, type=int, metavar='NTT',
                     help='number of triplets for training (default: 10000)')
 parser.add_argument('--num-valid-triplets', default=10000, type=int, metavar='NVT',
                     help='number of triplets for vaidation (default: 10000)')
-parser.add_argument('--embedding-size', default=128, type=int, metavar='ES',
-                    help='embedding size (default: 128)')
 parser.add_argument('--batch-size', default=64, type=int, metavar='BS',
                     help='batch size (default: 128)')
 parser.add_argument('--num-workers', default=8, type=int, metavar='NW',
@@ -92,8 +88,7 @@ def main():
     print("Unfreeze only:", ', '.join(unfreeze))
     print("Freeze only:", ', '.join(freeze))
     print(f"Learning rate will decayed every {args.step_size}th epoch")
-    model = FaceNetModel(embedding_size=args.embedding_size, num_classes=args.num_classes, pretrained=pretrain).to(
-        device)
+    model = FaceNetModel(pretrained=pretrain).to(device)
     triplet_loss = TripletLoss(args.margin).to(device)
 
     if fc_only:

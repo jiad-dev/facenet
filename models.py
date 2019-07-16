@@ -10,11 +10,11 @@ class Flatten(nn.Module):
 
 
 class FaceNetModel(nn.Module):
-    def __init__(self, embedding_size, num_classes, pretrained=False):
+    def __init__(self, pretrained=False):
         super(FaceNetModel, self).__init__()
 
         self.model = resnet50(pretrained)
-        self.embedding_size = embedding_size
+        self.embedding_size = 128
         self.cnn = nn.Sequential(
             self.model.conv1,
             self.model.bn1,
@@ -29,7 +29,7 @@ class FaceNetModel(nn.Module):
         self.model.fc = nn.Sequential(
             Flatten(),
             nn.Linear(100352, 1024),
-            nn.BatchNorm2d(1024),
+            nn.BatchNorm1d(1024),
             nn.ReLU(inplace=True),
             nn.Linear(1024, self.embedding_size))
 
