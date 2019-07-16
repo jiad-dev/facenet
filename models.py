@@ -25,11 +25,15 @@ class FaceNetModel(nn.Module):
             self.model.layer3,
             self.model.layer4)
 
+        # modify fc layer based on https://arxiv.org/abs/1703.07737
         self.model.fc = nn.Sequential(
             Flatten(),
-            nn.Linear(100352, self.embedding_size))
+            nn.Linear(100352, 1024),
+            nn.BatchNorm2d(1024),
+            nn.ReLU(inplace=True),
+            nn.Linear(1024, self.embedding_size))
 
-        self.model.classifier = nn.Linear(self.embedding_size, num_classes)
+        # self.model.classifier = nn.Linear(self.embedding_size, num_classes)
 
     def l2_norm(self, input):
         input_size = input.size()
@@ -94,7 +98,7 @@ class FaceNetModel(nn.Module):
         features = features * alpha
         return features
 
-    def forward_classifier(self, x):
-        features = self.forward(x)
-        res = self.model.classifier(features)
-        return res
+    # def forward_classifier(self, x):
+    #     features = self.forward(x)
+    #     res = self.model.classifier(features)
+    #     return res
