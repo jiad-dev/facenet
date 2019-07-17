@@ -50,57 +50,41 @@ parser.add_argument('--unfreeze', type=str, metavar='UF', default='',
 parser.add_argument('--freeze', type=str, metavar='F', default='',
                     help='Provide an option for freezeing given layers')
 parser.add_argument('--pretrain', action='store_true')
-parser.add_argument('--fc-only', action='store_true')
-parser.add_argument('--except-fc', action='store_true')
 parser.add_argument('--load-best', action='store_true')
 parser.add_argument('--load-last', action='store_true')
 parser.add_argument('--continue-step', action='store_true')
-parser.add_argument('--train-all', action='store_true', help='Train all layers')
 
 args = parser.parse_args()
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 l2_dist = PairwiseDistance(2)
-modelsaver = ModelSaver()
+model_saver = ModelSaver()
 
 
 # plotter = VisdomLinePlotter('Siamese Triplet')
 
 
 def save_if_best(state, acc):
-    modelsaver.save_if_best(acc, state)
+    model_saver.save_if_best(acc, state)
 
 
 def main():
     init_log_just_created("log/valid.csv")
     init_log_just_created("log/train.csv")
-
+    import pandas as pd
+    valid = pd.read_csv('log/valid.csv')
+    max_acc = valid['acc'].max()
     pretrain = args.pretrain
-    fc_only = args.fc_only
-    except_fc = args.except_fc
-    train_all = args.train_all
     unfreeze = args.unfreeze.split(',')
     freeze = args.freeze.split(',')
     start_epoch = 0
     print(f"Transfer learning: {pretrain}")
-    print("Train fc only:", fc_only)
-    print("Train except fc:", except_fc)
-    print("Train all layers:", train_all)
     print("Unfreeze only:", ', '.join(unfreeze))
     print("Freeze only:", ', '.join(freeze))
     print(f"Learning rate will decayed every {args.step_size}th epoch")
+    print(f"Max model accuracy: {max_acc:.5f}")
     model = FaceNetModel(pretrained=pretrain).to(device)
     triplet_loss = TripletLoss(args.margin).to(device)
 
-    if fc_only:
-        model.freeze_all()
-        model.unfreeze_fc()
-        model.unfreeze_classifier()
-    if except_fc:
-        model.unfreeze_all()
-        model.freeze_fc()
-        model.freeze_classifier()
-    if train_all:
-        model.unfreeze_all()
     if len(unfreeze) > 0:
         model.unfreeze_only(unfreeze)
     if len(freeze) > 0:
@@ -113,7 +97,7 @@ def main():
         checkpoint = './log/best_state.pth' if args.load_best else './log/last_checkpoint.pth'
         print('loading', checkpoint)
         checkpoint = torch.load(checkpoint)
-        modelsaver.current_acc = checkpoint['accuracy']
+        model_saver.current_acc = max_acc
         start_epoch = checkpoint['epoch'] + 1
         model.load_state_dict(checkpoint['state_dict'])
         print("Stepping scheduler")
