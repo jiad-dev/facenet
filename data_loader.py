@@ -6,6 +6,7 @@ import torch
 from skimage import io
 from torch.utils.data import Dataset
 from torchvision import transforms
+from collections import defaultdict
 
 
 class TripletFaceDataset(Dataset):
@@ -22,14 +23,8 @@ class TripletFaceDataset(Dataset):
     def generate_triplets(df, num_triplets):
 
         def make_dictionary_for_face_class(df):
-
-            '''
-              - face_classes = {'class0': [class0_id0, ...], 'class1': [class1_id0, ...], ...}
-            '''
-            face_classes = dict()
+            face_classes = defaultdict(list)
             for idx, label in enumerate(df['class']):
-                if label not in face_classes:
-                    face_classes[label] = []
                 face_classes[label].append((df.iloc[idx]['id'], df.iloc[idx]['ext']))
             return face_classes
 
