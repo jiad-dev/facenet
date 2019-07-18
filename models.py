@@ -33,8 +33,6 @@ class FaceNetModel(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(1024, self.embedding_size))
 
-        # self.model.classifier = nn.Linear(self.embedding_size, num_classes)
-
     def l2_norm(self, input):
         input_size = input.size()
         buffer = torch.pow(input, 2)
