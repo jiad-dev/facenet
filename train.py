@@ -81,6 +81,14 @@ def main():
     model = FaceNetModel(pretrained=pretrain).to(device)
     triplet_loss = TripletLoss(args.margin).to(device)
 
+    if args.fc_only:
+        model.freeze_all()
+        model.unfreeze_fc()
+    if args.except_fc:
+        model.unfreeze_all()
+        model.freeze_fc()
+    if args.train_all:
+        model.unfreeze_all()
     if len(unfreeze) > 0:
         model.unfreeze_only(unfreeze)
     if len(freeze) > 0:
