@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <img onclick="inputLeft.click()" id="img-left" src="{{ url_for('static', filename='anon.jpg') }}"
+                 class="rounded border img-fluid mx-auto d-block center-cropped"
+                 alt="Pair left">
+        </div>
+        <div class="col-md-6">
+            <img onclick="inputRight.click()" id="img-right" src="{{ url_for('static', filename='anon.jpg') }}"
+                 class="rounded border img-fluid center-cropped  mx-auto d-block"
+                 alt="Pair left">
+        </div>
+        <div class="col-md-12">
+            <br>
+            <button onclick="predict()" class="btn btn-primary mx-auto d-block">Prediksi</button>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    <script>
+        let imgLeft = document.getElementById('img-left');
+        let imgRight = document.getElementById('img-right');
+        let inputLeft = document.createElement('input');
+        let inputRight = document.createElement('input');
+        inputLeft.type = 'file';
+        inputLeft.accept = 'image/*';
+        inputRight.type = 'file';
+        inputRight.accept = 'image/*';
+        let data = {imgLeft: null, imgRight: null};
+
+        inputLeft.onchange = e => {
+            setImageFromObj(imgLeft, e, (file) => {
+                data.imgLeft = file;
+            })
+        };
+
+        inputRight.onchange = e => {
+            setImageFromObj(imgRight, e, (file) => {
+                console.log('setting img-right file');
+                data.imgRight = file;
+                console.log(data)
+            })
+        };
+
+        predict = () => {
+            formData = new FormData()
+            formData.append('imgLeft', data.imgLeft)
+            formData.append('imgRight', data.imgRight)
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            }).then((r) => r.json().then((data) => console.log(data)))
+        };
+
+        function setImageFromObj(element, obj, fun) {
+            const file = obj.target.files[0];
+            element.src = URL.createObjectURL(file);
+            fun(file)
+        }
+
+
+    </script>
+{% endblock %}
