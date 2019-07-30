@@ -16,6 +16,12 @@
             <button onclick="predict()" class="btn btn-primary mx-auto d-block">Prediksi</button>
         </div>
     </div>
+    <div class="row" style="margin-top: 20px">
+        <div class="col-md-12 text-center">
+            <h1 id="score"></h1>
+            <h3 id="similar"></h3>
+        </div>
+    </div>
 {% endblock %}
 {% block js %}
     <script>
@@ -23,6 +29,8 @@
         let imgRight = document.getElementById('img-right');
         let inputLeft = document.createElement('input');
         let inputRight = document.createElement('input');
+        let scoreElement = document.getElementById("score");
+        let similarElement = document.getElementById("similar")
         inputLeft.type = 'file';
         inputLeft.accept = 'image/*';
         inputRight.type = 'file';
@@ -37,9 +45,7 @@
 
         inputRight.onchange = e => {
             setImageFromObj(imgRight, e, (file) => {
-                console.log('setting img-right file');
                 data.imgRight = file;
-                console.log(data)
             })
         };
 
@@ -50,7 +56,11 @@
             fetch('/predict', {
                 method: 'POST',
                 body: formData
-            }).then((r) => r.json().then((data) => console.log(data)))
+            }).then((r) => r.json().then((data) => {
+                console.log(data)
+                scoreElement.innerText = data.score
+                similarElement.innerText = `Sama: ${data.same}`
+            }))
         };
 
         function setImageFromObj(element, obj, fun) {

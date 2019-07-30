@@ -1,6 +1,8 @@
 from PIL import Image
 from flask import Blueprint, render_template, request, jsonify
-from models import FaceNetModel
+
+import demo
+from demo.boot import app
 
 base = Blueprint('base', __name__)
 
@@ -13,8 +15,9 @@ def index():
 @base.route('/predict', methods=['post'])
 def predict():
     files = request.files
-    imgLeft = Image.open(files.get('imgLeft'))
-    imgRight = Image.open(files.get('imgRight'))
-    imgLeft.save('imgLeft.jpg')
-    imgRight.save('imgRight.jpg')
-    return jsonify(same=True, score=0.3, imgLeft='imgLeft' in files, imgRight='imgRight' in files)
+    img_left = Image.open(files.get('imgLeft'))
+    img_right = Image.open(files.get('imgRight'))
+    distance, similar = demo.is_same(img_left, img_right)
+    model_name = app.config['USE_MODEL']
+    model_acc = demo.ModelLoaded.acc
+    return jsonify(same=bool(similar), score=distance.item(), model_name=model_name, model_acc=model_acc)
