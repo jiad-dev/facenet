@@ -5,6 +5,7 @@ import demo
 from demo.boot import app
 
 base = Blueprint('base', __name__)
+THRESHOLD = .6
 
 
 @base.route('/')
@@ -17,7 +18,8 @@ def predict():
     files = request.files
     img_left = Image.open(files.get('imgLeft'))
     img_right = Image.open(files.get('imgRight'))
-    distance, similar = demo.is_same(img_left, img_right)
+    distance, similar = demo.is_same(img_left, img_right, THRESHOLD)
     model_name = app.config['USE_MODEL']
     model_acc = demo.ModelLoaded.acc
-    return jsonify(same=bool(similar), score=distance.item(), model_name=model_name, model_acc=model_acc)
+    return jsonify(same=('BERBEDA', 'SAMA')[similar.item()], score=distance.item(), model_name=model_name, model_acc=model_acc,
+                   threshold=THRESHOLD)
