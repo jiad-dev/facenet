@@ -7,8 +7,8 @@ APP_NAME = 'Demo Face Embedding'
 models = [
     './log/best_state.pth',
     './log/best_state_917.pth',
-    './log/best_state_92.pth',
-    './log/last_checkpoint.pth'
+    './log/best_state_92_no_optimizer.pth',
+    './log/last_checkpoint_no_optimizer.pth'
 ]
 
 USE_MODEL = models[2]
